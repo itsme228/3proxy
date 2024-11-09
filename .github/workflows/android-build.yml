@@ -26,7 +26,7 @@ jobs:
             ndk_target: x86_64-linux-android
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     
     - name: Set up NDK
       uses: nttld/setup-ndk@v1
@@ -57,7 +57,7 @@ jobs:
         tar czf ../3proxy-android-${{ matrix.arch }}.tar.gz *
         
     - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: 3proxy-android-${{ matrix.arch }}
         path: 3proxy-android-${{ matrix.arch }}.tar.gz
