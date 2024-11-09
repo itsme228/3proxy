@@ -1,0 +1,63 @@
+name: Build Android Binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for the build'
+        required: false
+        default: 'latest'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        arch: [arm, arm64, x86, x86_64]
+        include:
+          - arch: arm
+            ndk_target: armv7a-linux-androideabi
+          - arch: arm64
+            ndk_target: aarch64-linux-android  
+          - arch: x86
+            ndk_target: i686-linux-android
+          - arch: x86_64
+            ndk_target: x86_64-linux-android
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+        
+    - name: Configure Build
+      run: |
+        # Create Android Makefile
+        echo "CC = $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.ndk_target }}21-clang" > Makefile
+        echo "CFLAGS = -O2 -s -static" >> Makefile
+        echo "LDFLAGS = -static" >> Makefile
+        cat Makefile.Linux >> Makefile
+        
+    - name: Build
+      run: |
+        make
+        
+    - name: Create Release Archive
+      run: |
+        mkdir -p release/
+        cp bin/3proxy release/
+        cp bin/proxy release/
+        cp bin/socks release/
+        cp bin/tcppm release/
+        cp bin/udppm release/
+        cd release
+        tar czf ../3proxy-android-${{ matrix.arch }}.tar.gz *
+        
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: 3proxy-android-${{ matrix.arch }}
+        path: 3proxy-android-${{ matrix.arch }}.tar.gz
