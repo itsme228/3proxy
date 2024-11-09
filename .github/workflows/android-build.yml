@@ -14,11 +14,10 @@ jobs:
     
     strategy:
       matrix:
-        arch: [arm, arm64, x86, x86_64]
         include:
-          - arch: arm
+          - arch: armeabi-v7a
             ndk_target: armv7a-linux-androideabi
-          - arch: arm64
+          - arch: arm64-v8a
             ndk_target: aarch64-linux-android  
           - arch: x86
             ndk_target: i686-linux-android
