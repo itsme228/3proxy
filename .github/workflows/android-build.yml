@@ -36,13 +36,21 @@ jobs:
       run: |
         # Create Android Makefile
         echo "CC = $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.ndk_target }}21-clang" > Makefile
-        echo "CFLAGS = -O2 -s -static -fPIE -D__ANDROID_API__=21" >> Makefile
-        echo "LDFLAGS = -static -pie" >> Makefile
+        echo "CFLAGS = -O2 -fPIC -fPIE -D__ANDROID_API__=21" >> Makefile
+        echo "LDFLAGS = -pie" >> Makefile
         cat Makefile.Linux >> Makefile
         
     - name: Build
       run: |
         make
+        
+    - name: Set Permissions
+      run: |
+        chmod +x bin/3proxy
+        chmod +x bin/proxy
+        chmod +x bin/socks
+        chmod +x bin/tcppm
+        chmod +x bin/udppm
         
     - name: Create Release Archive
       run: |
