@@ -36,8 +36,8 @@ jobs:
       run: |
         # Create Android Makefile
         echo "CC = $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.ndk_target }}21-clang" > Makefile
-        echo "CFLAGS = -O2 -s -static" >> Makefile
-        echo "LDFLAGS = -static" >> Makefile
+        echo "CFLAGS = -O2 -s -static -fPIE -D__ANDROID_API__=21" >> Makefile
+        echo "LDFLAGS = -static -pie" >> Makefile
         cat Makefile.Linux >> Makefile
         
     - name: Build
