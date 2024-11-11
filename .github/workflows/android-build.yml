@@ -27,6 +27,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpcre3-dev libssl-dev
+    
     - name: Set up NDK
       uses: nttld/setup-ndk@v1
       with:
@@ -36,19 +41,20 @@ jobs:
       run: |
         # Create Android Makefile
         echo "CC = $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.ndk_target }}21-clang" > Makefile
-        echo "CFLAGS = -g -O2 -fno-strict-aliasing -c -pthread -DWITHSPLICE -D_GNU_SOURCE -DGETHOSTBYNAME_R -D_THREAD_SAFE -D_REENTRANT -DNOODBC -DWITH_STD_MALLOC -DFD_SETSIZE=4096 -DWITH_POLL -D__ANDROID_API__=21 -fPIC" >> Makefile
+        echo "CFLAGS = -g -O2 -fno-strict-aliasing -c -pthread -DWITHSPLICE -D_GNU_SOURCE -DGETHOSTBYNAME_R -D_THREAD_SAFE -D_REENTRANT -DNOODBC -DWITH_STD_MALLOC -DFD_SETSIZE=4096 -DWITH_POLL -D__ANDROID_API__=21 -fPIC -DWITH_SSL -DWITH_PCRE" >> Makefile
         echo "LDFLAGS = -fPIC -O2 -pthread" >> Makefile
         echo "DLFLAGS = -shared" >> Makefile
-        echo "LIBS = -ldl" >> Makefile
+        echo "LIBS = -ldl -lpcre -lssl -lcrypto" >> Makefile
         cat Makefile.Linux >> Makefile
         
     - name: Build
       run: |
         make
         
-    - name: Check Binary
+    - name: Check Binaries
       run: |
         file bin/3proxy
+        ls -la bin/
         
     - name: Set Permissions
       run: |
@@ -57,15 +63,28 @@ jobs:
         chmod +x bin/socks
         chmod +x bin/tcppm
         chmod +x bin/udppm
+        chmod +x bin/ftppr
+        chmod +x bin/pop3p
+        chmod +x bin/smtpp
+        chmod +x bin/tlspr
+        chmod +x bin/mycrypt
+        chmod +x bin/*.so
         
     - name: Create Release Archive
       run: |
         mkdir -p release/
+        # Copy all binaries and plugins
         cp bin/3proxy release/
         cp bin/proxy release/
         cp bin/socks release/
         cp bin/tcppm release/
         cp bin/udppm release/
+        cp bin/ftppr release/
+        cp bin/pop3p release/
+        cp bin/smtpp release/
+        cp bin/tlspr release/
+        cp bin/mycrypt release/
+        cp bin/*.so release/
         cd release
         tar czf ../3proxy-android-${{ matrix.arch }}.tar.gz *
         
