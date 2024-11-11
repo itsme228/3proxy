@@ -36,13 +36,19 @@ jobs:
       run: |
         # Create Android Makefile
         echo "CC = $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.ndk_target }}21-clang" > Makefile
-        echo "CFLAGS = -O2 -fPIC -fPIE -D__ANDROID_API__=21" >> Makefile
-        echo "LDFLAGS = -pie" >> Makefile
+        echo "CFLAGS = -g -O2 -fno-strict-aliasing -c -pthread -DWITHSPLICE -D_GNU_SOURCE -DGETHOSTBYNAME_R -D_THREAD_SAFE -D_REENTRANT -DNOODBC -DWITH_STD_MALLOC -DFD_SETSIZE=4096 -DWITH_POLL -D__ANDROID_API__=21 -fPIC" >> Makefile
+        echo "LDFLAGS = -fPIC -O2 -pthread" >> Makefile
+        echo "DLFLAGS = -shared" >> Makefile
+        echo "LIBS = -ldl" >> Makefile
         cat Makefile.Linux >> Makefile
         
     - name: Build
       run: |
         make
+        
+    - name: Check Binary
+      run: |
+        file bin/3proxy
         
     - name: Set Permissions
       run: |
